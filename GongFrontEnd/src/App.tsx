@@ -1,69 +1,90 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+import { useState, useEffect } from 'react';
+import './App.css';
+import {jwtDecode} from 'jwt-decode';
+import Deals from './Deals';
 
 function App() {
- const [count, setCount] = useState(0)
- const [unRungDeals, setUnRungDeals] = useState([])
+  const [user, setUser] = useState({});
+  const [unRungDeals, setUnRungDeals] = useState([]);
+  const [userDeals, setuserDeals] = useState([])
+
+  const handleCallBackResponse = (response) => {
+    const userObject = jwtDecode(response.credential);
+    console.log(userObject);
+    setUser(userObject);
+    localStorage.setItem("gongUser", response.credential);
+    setuserDeals(unRungDeals.filter(deal => deal.repEmail === userObject.email))
+  };
+
+  const handleSignOut = () => {
+    setUser({}); 
+    localStorage.removeItem("gongUser")
+    console.log('User signed out');
+  };
+
+  const getUnrungDeals = async () => {
+    try {
+      const URL = 'https://brodieheg.pythonanywhere.com/unrung-deals';
+      const response = await fetch(URL);
+      const res = await response.json();
+      setUnRungDeals(res);
+      console.log(res);
+      return;
+    } catch {
+      console.log('Could not fetch');
+    }
+    return;
+  };
+
+  useEffect(() => {
+    getUnrungDeals();
+  }, []);
+
+  useEffect(() => {
+    if(localStorage.getItem("gongUser")) {
+      const userObject = jwtDecode(localStorage.getItem("gongUser"));
+      setUser(userObject);
+    }}, [])
+  
+  useEffect(() => {
+    if(!user.email)
+      {
+        /* global google */
+        google.accounts.id.initialize({
+          client_id: '968739805873-h7iqm1m0qpkestn3u9ii15o3cqvmi1me.apps.googleusercontent.com',
+          callback: handleCallBackResponse,
+        });
+        
+        google.accounts.id.renderButton(
+          document.getElementById('signInDiv'),
+          { theme: 'outline', size: 'large' }
+        );
+      }
+  }, [user]);
+
+    return (
+      <>
+        <div>
+          {user.email ? 
+            (
+            <>
+            <p>
+              Welcome, {user.name}!
+            </p>
+              <Deals userDeals={userDeals}></Deals>
+             <button onClick={handleSignOut} style={{ marginLeft: '10px' }}>
+              Sign Out
+              </button>
+            </>
+          ) : <div id = 'signInDiv'></div>
+
+          
+        }
+          
+        </div>
+      </>
+    );
+  } 
 
 
-
- const getUnrungDeals = async () =>  {
-   try {
-     const URL = 'https://brodieheg.pythonanywhere.com/unrung-deals';
-     console.log(URL)
-     const response = await fetch(URL);
-     const res = await response.json();
-     setUnRungDeals(res)
-     console.log(unRungDeals)
-     return
-   }
-   catch {
-     console.log('could not fetch')
-   }
-   return
- }
-
-
- useEffect(
-     () => {
-       getUnrungDeals()
-     }, []
- )
-
-
- return (
-   <>
-     <div>
-       <a href="https://vite.dev" target="_blank">
-         <img src={viteLogo} className="logo" alt="Vite logo" />
-       </a>
-       <a href="https://react.dev" target="_blank">
-         <img src={reactLogo} className="logo react" alt="React logo" />
-       </a>
-     </div>
-     <h1>Vite + React</h1>
-     <div className="card">
-       <button onClick={() => setCount((count) => count + 1)}>
-         count is {count}
-       </button>
-       <p>
-         Edit <code>src/App.tsx</code> and save to test HMR
-       </p>
-     </div>
-     <p className="read-the-docs">
-       Click on the Vite and React logos to learn more
-     </p>
-   </>
- )
-}
-
-
-export default App
-
-
-
-
-
+export default App;
