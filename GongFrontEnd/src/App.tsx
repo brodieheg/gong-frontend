@@ -8,7 +8,6 @@ function App() {
   const [unRungDeals, setUnRungDeals] = useState([]);
   const [userDeals, setuserDeals] = useState([])
   // Function to handle fetch request in child component. It is here because it needs to change userDeals
-  useEffect(() => {console.log(unRungDeals); console.log(userDeals)}, [unRungDeals, userDeals])
   const handleClick = (e) => {
     const id = e.target.closest('p').id
     
@@ -32,7 +31,6 @@ function App() {
 
   const handleCallBackResponse = (response) => {
     const userObject = jwtDecode(response.credential);
-    console.log(userObject);
     setUser(userObject);
     localStorage.setItem("gongUser", response.credential);
     setuserDeals(unRungDeals.filter(deal => deal.repEmail === userObject.email))
@@ -41,7 +39,6 @@ function App() {
   const handleSignOut = () => {
     setUser({}); 
     localStorage.removeItem("gongUser")
-    console.log('User signed out');
   };
 
   const getUnrungDeals = async () => {
@@ -50,7 +47,6 @@ function App() {
       const response = await fetch(URL);
       const res = await response.json();
       setUnRungDeals(res);
-      console.log(res);
       return;
     } catch {
       console.log('Could not fetch');

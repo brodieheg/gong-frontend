@@ -1,6 +1,5 @@
 function Deals({userDeals, handleClick}) {
     
-    console.log(userDeals)
     if(userDeals.length > 0) {
         console.log('user deals!!!')
         return(
