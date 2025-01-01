@@ -1,4 +1,5 @@
-function Deals({userDeals}) {
+function Deals({userDeals, handleClick}) {
+    
     console.log(userDeals)
     if(userDeals.length > 0) {
         console.log('user deals!!!')
@@ -6,7 +7,12 @@ function Deals({userDeals}) {
             <>
             <h3>You Have Wins to Celebrate!!</h3>
             {userDeals.map( deal => {
-                return (<p key={deal.id}>{deal.account}, ${deal.arr}</p>)
+                return (
+                    <p 
+                    id={deal.id} key={deal.id}>{deal.account}, ${deal.arr}
+                    <button style={{marginLeft: '2em'}}onClick={handleClick}>Ring the Gong!</button>
+                    </p>
+                    )
             })}
             </>
         )

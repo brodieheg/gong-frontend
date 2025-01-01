@@ -7,6 +7,28 @@ function App() {
   const [user, setUser] = useState({});
   const [unRungDeals, setUnRungDeals] = useState([]);
   const [userDeals, setuserDeals] = useState([])
+  // Function to handle fetch request in child component. It is here because it needs to change userDeals
+  useEffect(() => {console.log(unRungDeals); console.log(userDeals)}, [unRungDeals, userDeals])
+  const handleClick = (e) => {
+    const id = e.target.closest('p').id
+    
+    fetch("https://brodieheg.pythonanywhere.com/ring", {
+        method: "PUT",
+        body: JSON.stringify({
+          id: id,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        }
+      })
+      .then(response => {
+        if(response.status != 200) 
+            {alert('Unable to ring for this deal.') 
+                return}
+        setuserDeals(userDeals.filter(deal => deal.id != id))
+            })
+      ;
+}
 
   const handleCallBackResponse = (response) => {
     const userObject = jwtDecode(response.credential);
@@ -71,12 +93,16 @@ function App() {
             <p>
               Welcome, {user.name}!
             </p>
-              <Deals userDeals={userDeals}></Deals>
+              <Deals handleClick={handleClick} userDeals={userDeals}></Deals>
              <button onClick={handleSignOut} style={{ marginLeft: '10px' }}>
               Sign Out
               </button>
             </>
-          ) : <div id = 'signInDiv'></div>
+          ) : 
+          <>
+          <h4>Let's celebrate! Sign in to see your recent recent wins!</h4>
+          <div id = 'signInDiv'></div>
+          </>
 
           
         }
